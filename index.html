@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AquaAI — Smart Water Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#0f1117;
+  --sidebar:#0b0d12;
+  --card:#181b24;
+  --card2:#1e2130;
+  --border:#252936;
+  --t1:#e9ecf5;
+  --t2:#8892aa;
+  --t3:#4a5068;
+  --blue:#3d8eff;
+  --blue2:#1a6cff;
+  --teal:#00d4aa;
+  --green:#22d46a;
+  --orange:#f5a623;
+  --red:#ff4d4d;
+  --pink:#ff6fa3;
+  --purple:#a78bfa;
+  --font:'DM Sans',sans-serif;
+  --mono:'DM Mono',monospace;
+  --sw:230px;
+}
+
+body{font-family:var(--font);background:var(--bg);color:var(--t1);display:flex;height:100vh;overflow:hidden}
+
+/* ─── SIDEBAR ─── */
+.sidebar{width:var(--sw);background:var(--sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:20px 14px;flex-shrink:0;gap:0}
+.logo-wrap{display:flex;align-items:center;gap:10px;margin-bottom:26px;padding:0 4px}
+.logo-ico{width:36px;height:36px;background:linear-gradient(135deg,#1a6fff,#00c8d4);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.logo-name{font-size:16px;font-weight:700}
+.logo-sub{font-size:10.5px;color:var(--t3);margin-top:1px}
+.sec-label{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);padding:12px 8px 5px}
+.nav{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:8px;font-size:13px;font-weight:500;color:var(--t2);cursor:pointer;transition:all .15s;margin-bottom:2px;user-select:none}
+.nav:hover{background:#1a1d28;color:var(--t1)}
+.nav.active{background:rgba(61,142,255,.15);color:var(--blue);border:1px solid rgba(61,142,255,.2)}
+.nav:not(.active){border:1px solid transparent}
+.nav-icon{width:16px;height:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* ─── MAIN ─── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{display:flex;align-items:center;gap:12px;padding:13px 22px;border-bottom:1px solid var(--border);flex-shrink:0}
+.tb-title{font-size:19px;font-weight:700}
+.tb-sub{font-size:12.5px;color:var(--t3);margin-left:2px}
+.tb-space{flex:1}
+.badge{font-size:11.5px;font-weight:500;padding:5px 12px;border-radius:20px;border:1px solid}
+.badge-phase{background:#161c2e;border-color:#253050;color:#7ba8d8}
+.badge-live{background:#0f2018;border-color:#1a3d28;color:var(--green);display:flex;align-items:center;gap:6px}
+.live-dot{width:7px;height:7px;background:var(--green);border-radius:50%;box-shadow:0 0 7px var(--green);animation:blink 1.8s ease-in-out infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* pages */
+.page{display:none;flex:1;overflow-y:auto;padding:20px 22px;flex-direction:column;gap:16px}
+.page.active{display:flex}
+.page::-webkit-scrollbar{width:4px}
+.page::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+
+/* ─── CARD BASE ─── */
+.card{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:18px 20px}
+.card-hd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
+.card-title{font-size:14px;font-weight:700}
+.card-sub{font-size:11.5px;color:var(--t3);margin-top:2px}
+.card-tag{font-size:11px;color:var(--t3);text-align:right;line-height:1.5}
+
+/* ════════════════════════
+   PAGE 1 — DASHBOARD
+════════════════════════ */
+.dash-top{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.dash-bot{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:0}
+
+/* Gauge */
+.gauge-wrap{display:flex;flex-direction:column;align-items:center;padding:22px 20px}
+.gauge-svg-wrap{position:relative;width:180px;height:180px}
+.gauge-svg-wrap svg{width:100%;height:100%}
+.gauge-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.gauge-val{font-size:34px;font-weight:700;font-family:var(--mono);line-height:1}
+.gauge-unit{font-size:12px;color:var(--t2);margin-top:2px}
+.gauge-caption{font-size:13px;color:var(--t2);margin-top:12px;text-align:center}
+
+/* Live flow */
+.flow-status{display:flex;flex-direction:column;justify-content:center;gap:14px;padding:10px 4px}
+.flow-row{display:flex;align-items:center;justify-content:space-between}
+.flow-label{font-size:13px;color:var(--t2)}
+.flow-val{font-size:13px;font-weight:600;font-family:var(--mono)}
+.pill{font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px}
+.pill-active{background:rgba(34,212,106,.15);color:var(--green);border:1px solid rgba(34,212,106,.25)}
+.pill-idle{background:rgba(74,80,104,.15);color:var(--t3);border:1px solid var(--border)}
+.flow-divider{border:none;border-top:1px solid var(--border)}
+.flow-rate-big{font-size:28px;font-weight:700;font-family:var(--mono);color:var(--teal)}
+.flow-rate-lbl{font-size:11px;color:var(--t3);margin-top:3px}
+
+/* Budget bar */
+.budget-card{display:flex;flex-direction:column;justify-content:center;gap:12px}
+.budget-nums{display:flex;justify-content:space-between;align-items:baseline}
+.budget-used{font-size:28px;font-weight:700;font-family:var(--mono);color:var(--blue)}
+.budget-total{font-size:13px;color:var(--t3)}
+.btrack{background:#1e2130;border-radius:6px;height:10px;overflow:hidden;position:relative}
+.bfill{height:100%;border-radius:6px;background:linear-gradient(90deg,var(--blue2),var(--teal));transition:width .6s ease}
+.bticks{display:flex;justify-content:space-between;margin-top:5px;font-size:10.5px;color:var(--t3)}
+.btick-warn{color:var(--orange)}
+.btick-danger{color:var(--red)}
+.budget-pct{font-size:12px;color:var(--t2)}
+
+/* mini stat cards */
+.mini-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mini-card{background:var(--card2);border:1px solid var(--border);border-radius:10px;padding:13px 15px}
+.mini-label{font-size:11px;color:var(--t3);margin-bottom:5px}
+.mini-val{font-size:20px;font-weight:700;font-family:var(--mono)}
+.mini-sub{font-size:11px;margin-top:3px}
+.txt-green{color:var(--green)}.txt-red{color:var(--red)}.txt-orange{color:var(--orange)}.txt-blue{color:var(--blue)}.txt-teal{color:var(--teal)}.txt-purple{color:var(--purple)}
+
+/* ════════════════════════
+   PAGE 2 — USAGE BREAKDOWN
+════════════════════════ */
+.usage-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.usage-full{grid-column:1/-1}
+
+/* pie chart via conic */
+.pie-wrap{display:flex;align-items:center;gap:28px;padding:8px 4px}
+.pie-chart{width:160px;height:160px;border-radius:50%;flex-shrink:0;background:conic-gradient(
+  #3d8eff 0% 38%,
+  #00d4aa 38% 60%,
+  #f5a623 60% 78%,
+  #ff6fa3 78% 92%,
+  #a78bfa 92% 100%
+);box-shadow:0 0 30px rgba(61,142,255,.2)}
+.pie-legend{display:flex;flex-direction:column;gap:9px}
+.leg-item{display:flex;align-items:center;gap:9px;font-size:13px}
+.leg-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.leg-name{color:var(--t2);flex:1}
+.leg-pct{font-weight:600;font-family:var(--mono)}
+
+/* horiz bar chart */
+.hbar-list{display:flex;flex-direction:column;gap:11px}
+.hbar-item{display:grid;grid-template-columns:120px 1fr 48px;align-items:center;gap:10px}
+.hbar-name{font-size:12.5px;color:var(--t2);text-align:right}
+.hbar-track{background:#1e2130;border-radius:4px;height:9px;overflow:hidden}
+.hbar-fill{height:100%;border-radius:4px;transition:width .5s}
+.hbar-val{font-size:12.5px;font-weight:600;font-family:var(--mono)}
+
+/* daily trend mini bars */
+.trend-bars{display:flex;align-items:flex-end;gap:6px;height:80px;padding-top:8px}
+.trend-bar-wrap{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1}
+.trend-bar{border-radius:4px 4px 0 0;background:var(--blue);opacity:.7;transition:opacity .2s;width:100%}
+.trend-bar.today{opacity:1;background:var(--teal)}
+.trend-bar-wrap:hover .trend-bar{opacity:1}
+.trend-day{font-size:10px;color:var(--t3)}
+
+/* ════════════════════════
+   PAGE 3 — FORECASTING
+════════════════════════ */
+.forecast-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.forecast-full{grid-column:1/-1}
+
+/* SVG line chart */
+.chart-container{width:100%;overflow:hidden}
+.chart-svg{width:100%;height:220px}
+
+/* confidence band, line, today marker all in SVG */
+.conf-band{fill:rgba(61,142,255,.1)}
+.forecast-line{fill:none;stroke:var(--blue);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.actual-line{fill:none;stroke:var(--teal);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.today-line{stroke:rgba(255,255,255,.25);stroke-width:1.5;stroke-dasharray:5,4}
+.today-label{fill:var(--t2);font-size:11px;font-family:'DM Mono',monospace}
+.axis-line{stroke:var(--border);stroke-width:1}
+.grid-line{stroke:var(--border);stroke-width:1;stroke-dasharray:3,5}
+.axis-label{fill:var(--t3);font-size:11px;font-family:'DM Mono',monospace}
+.data-dot{fill:var(--blue);stroke:var(--card);stroke-width:2}
+.data-dot.today-dot{fill:var(--teal);r:5}
+
+/* forecast stat cards */
+.fstat{display:flex;flex-direction:column;gap:6px;padding:4px}
+.fstat-val{font-size:26px;font-weight:700;font-family:var(--mono)}
+.fstat-label{font-size:12px;color:var(--t2)}
+.fstat-change{font-size:11.5px}
+
+/* 7-day table */
+.day-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.day-table th{color:var(--t3);font-weight:500;padding:6px 10px;border-bottom:1px solid var(--border);text-align:left}
+.day-table td{padding:8px 10px;border-bottom:1px solid rgba(37,41,54,.5);color:var(--t2)}
+.day-table td:first-child{color:var(--t1);font-weight:500}
+.day-table td.today-row{color:var(--teal);font-weight:600}
+.day-table tr:last-child td{border-bottom:none}
+.conf-bar-sm{display:inline-block;height:5px;border-radius:3px;background:rgba(61,142,255,.4);vertical-align:middle;margin-left:4px}
+
+/* ════════════════════════
+   PAGE 4 — ALERTS
+════════════════════════ */
+.alerts-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.alerts-full{grid-column:1/-1}
+
+.alert-card{border-radius:13px;padding:18px 20px;border:1px solid}
+.alert-red{background:rgba(255,77,77,.07);border-color:rgba(255,77,77,.25)}
+.alert-green{background:rgba(34,212,106,.07);border-color:rgba(34,212,106,.25)}
+.alert-orange{background:rgba(245,166,35,.07);border-color:rgba(245,166,35,.25)}
+.alert-blue{background:rgba(61,142,255,.07);border-color:rgba(61,142,255,.25)}
+
+.alert-hd{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px}
+.alert-ico{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.ico-red{background:rgba(255,77,77,.2)}
+.ico-green{background:rgba(34,212,106,.2)}
+.ico-orange{background:rgba(245,166,35,.2)}
+.ico-blue{background:rgba(61,142,255,.2)}
+.alert-title-wrap{}
+.alert-title{font-size:13.5px;font-weight:700;margin-bottom:2px}
+.alert-time{font-size:11px;color:var(--t3)}
+.alert-body{font-size:12.5px;color:var(--t2);line-height:1.55;margin-bottom:12px}
+.alert-meta{display:flex;gap:8px;flex-wrap:wrap}
+.meta-chip{font-size:11px;padding:3px 9px;border-radius:12px;border:1px solid}
+.chip-red{background:rgba(255,77,77,.1);border-color:rgba(255,77,77,.3);color:#ff7070}
+.chip-green{background:rgba(34,212,106,.1);border-color:rgba(34,212,106,.3);color:#22d46a}
+.chip-orange{background:rgba(245,166,35,.1);border-color:rgba(245,166,35,.3);color:var(--orange)}
+.chip-blue{background:rgba(61,142,255,.1);border-color:rgba(61,142,255,.3);color:var(--blue)}
+
+.alert-btn{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:6px 14px;border-radius:8px;border:none;cursor:pointer;font-family:var(--font);margin-top:4px}
+.btn-red{background:rgba(255,77,77,.2);color:#ff7070}
+.btn-green{background:rgba(34,212,106,.2);color:var(--green)}
+.btn-orange{background:rgba(245,166,35,.2);color:var(--orange)}
+.btn-blue{background:rgba(61,142,255,.2);color:var(--blue)}
+
+/* ════════════════════════
+   PAGE 5 — ANOMALY DETECTION
+════════════════════════ */
+.anomaly-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.anomaly-full{grid-column:1/-1}
+.anom-score-ring{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px}
+.anom-ring-wrap{position:relative;width:140px;height:140px}
+.anom-ring-wrap svg{width:100%;height:100%}
+.anom-ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.anom-score-val{font-size:30px;font-weight:700;font-family:var(--mono)}
+.anom-score-lbl{font-size:11px;color:var(--t3);margin-top:2px}
+.anom-caption{font-size:12px;color:var(--t2);margin-top:10px;text-align:center}
+
+.anom-event-list{display:flex;flex-direction:column;gap:8px}
+.anom-event{display:flex;align-items:center;gap:12px;padding:11px 14px;background:var(--card2);border:1px solid var(--border);border-radius:10px}
+.anom-sev{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.sev-high{background:var(--red);box-shadow:0 0 6px var(--red)}
+.sev-med{background:var(--orange);box-shadow:0 0 6px var(--orange)}
+.sev-low{background:var(--green);box-shadow:0 0 6px var(--green)}
+.anom-info{flex:1}
+.anom-name{font-size:13px;font-weight:600}
+.anom-desc{font-size:11.5px;color:var(--t3);margin-top:2px}
+.anom-time{font-size:11px;color:var(--t3);text-align:right;font-family:var(--mono)}
+
+/* sensitivity control */
+.sens-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.sens-label{font-size:12px;color:var(--t2);width:60px}
+.sens-track{flex:1;height:5px;background:#1e2130;border-radius:3px;overflow:hidden}
+.sens-fill{height:100%;border-radius:3px}
+.sens-val{font-size:12px;font-family:var(--mono);width:30px;text-align:right}
+
+/* model health */
+.model-health{display:flex;flex-direction:column;gap:10px}
+.mh-row{display:flex;justify-content:space-between;align-items:center}
+.mh-label{font-size:12.5px;color:var(--t2)}
+.mh-bar-wrap{width:120px;height:6px;background:#1e2130;border-radius:3px;overflow:hidden}
+.mh-bar{height:100%;border-radius:3px}
+
+/* ════════════════════════
+   PAGE 6 — FORECASTING (sidebar link)
+   (reuses Page 3 layout)
+════════════════════════ */
+
+/* page titles */
+.page-title-row{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.page-icon{font-size:20px}
+.page-h{font-size:18px;font-weight:700}
+.page-desc{font-size:12.5px;color:var(--t3);margin-bottom:4px}
+</style>
+</head>
+<body>
+
+<!-- ══════════ SIDEBAR ══════════ -->
+<aside class="sidebar">
+  <div class="logo-wrap">
+    <div class="logo-ico">💧</div>
+    <div>
+      <div class="logo-name">AquaAI</div>
+      <div class="logo-sub">SR University · Patent demo</div>
+    </div>
+  </div>
+
+  <div class="sec-label">Monitor</div>
+  <div class="nav active" onclick="showPage('dashboard',this)">
+    <div class="nav-icon">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity=".9"/><rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity=".6"/><rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".6"/><rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity=".4"/></svg>
+    </div>Dashboard
+  </div>
+  <div class="nav" onclick="showPage('anomaly',this)">
+    <div class="nav-icon">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.8"/><line x1="8" y1="5" x2="8" y2="8.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="8" cy="11" r="1" fill="currentColor"/></svg>
+    </div>Anomaly detection
+  </div>
+  <div class="nav" onclick="showPage('forecasting',this)">
+    <div class="nav-icon">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><polyline points="1,12 5,7 8,9 12,4 15,6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>Forecasting
+  </div>
+
+  <div class="sec-label">Analytics</div>
+  <div class="nav" onclick="showPage('usage',this)">
+    <div class="nav-icon">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="8" width="3" height="7" rx="1" fill="currentColor"/><rect x="6" y="5" width="3" height="10" rx="1" fill="currentColor" opacity=".8"/><rect x="11" y="2" width="3" height="13" rx="1" fill="currentColor" opacity=".6"/></svg>
+    </div>Usage Breakdown
+  </div>
+  <div class="nav" onclick="showPage('alerts',this)">
+    <div class="nav-icon">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 1L2 13h12L8 1z" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linejoin="round"/><line x1="8" y1="6" x2="8" y2="9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="8" cy="11.5" r=".8" fill="currentColor"/></svg>
+    </div>Alerts & Recommendations
+  </div>
+
+  <div class="sec-label">System</div>
+  <div class="nav" onclick="showPage('mlpipeline',this)">
+    <div class="nav-icon">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="5" width="4" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="6" y="3" width="4" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="11" y="6" width="4" height="5" rx="1" stroke="currentColor" stroke-width="1.5"/></svg>
+    </div>ML Pipeline
+  </div>
+  <div class="nav" onclick="showPage('deployment',this)">
+    <div class="nav-icon">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5" stroke="currentColor" stroke-width="1.5"/></svg>
+    </div>Deployment
+  </div>
+</aside>
+
+<!-- ══════════ MAIN ══════════ -->
+<div class="main">
+  <div class="topbar">
+    <span class="tb-title" id="tb-title">Live dashboard</span>
+    <span class="tb-sub" id="tb-sub">Today · H1 flow meter</span>
+    <div class="tb-space"></div>
+    <div class="badge badge-phase">Phase 2 — Active modeling</div>
+    <div class="badge badge-live"><span class="live-dot"></span>Live</div>
+  </div>
+
+  <!-- ══ PAGE: DASHBOARD ══ -->
+  <div class="page active" id="page-dashboard">
+    <div class="dash-top">
+
+      <!-- Gauge card -->
+      <div class="card" style="grid-column:1/2">
+        <div class="card-hd"><div><div class="card-title">Today's Consumption</div><div class="card-sub">Real-time · H1 sensor</div></div><div class="card-tag">Live<br>update</div></div>
+        <div class="gauge-wrap">
+          <div class="gauge-svg-wrap">
+            <svg viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg">
+              <!-- bg arc -->
+              <circle cx="90" cy="90" r="72" fill="none" stroke="#1e2130" stroke-width="14" stroke-dasharray="339 113" stroke-dashoffset="-56" stroke-linecap="round" transform="rotate(0,90,90)"/>
+              <!-- coloured arc 87/150 = 58% of 339 = 197 -->
+              <circle cx="90" cy="90" r="72" fill="none" stroke="url(#ggrad)" stroke-width="14" stroke-dasharray="197 255" stroke-dashoffset="-56" stroke-linecap="round"/>
+              <!-- tick marks -->
+              <defs>
+                <linearGradient id="ggrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#1a6fff"/>
+                  <stop offset="100%" stop-color="#00d4aa"/>
+                </linearGradient>
+              </defs>
+              <!-- labels 0 / 75 / 150 -->
+              <text x="28" y="155" fill="#4a5068" font-size="10" font-family="DM Mono">0</text>
+              <text x="80" y="172" fill="#4a5068" font-size="10" font-family="DM Mono">75</text>
+              <text x="140" y="155" fill="#4a5068" font-size="10" font-family="DM Mono">150</text>
+            </svg>
+            <div class="gauge-center">
+              <div class="gauge-val txt-teal">87</div>
+              <div class="gauge-unit">litres used</div>
+            </div>
+          </div>
+          <div class="gauge-caption" style="color:var(--t3)">of <strong style="color:var(--t1)">150 L</strong> daily budget · <span style="color:var(--green)">↓14% vs avg</span></div>
+        </div>
+      </div>
+
+      <!-- Live Flow card -->
+      <div class="card" style="grid-column:2/3">
+        <div class="card-hd"><div><div class="card-title">Live Flow Status</div><div class="card-sub">H1 meter · 2 sec refresh</div></div></div>
+        <div class="flow-status">
+          <div class="flow-row"><span class="flow-label">Flow state</span><span class="pill pill-active">● Active</span></div>
+          <hr class="flow-divider">
+          <div>
+            <div class="flow-rate-big">0.42 <span style="font-size:16px;color:var(--t2)">L/min</span></div>
+            <div class="flow-rate-lbl">Current flow rate</div>
+          </div>
+          <hr class="flow-divider">
+          <div class="flow-row"><span class="flow-label">Detected appliance</span><span class="flow-val txt-blue">Shower</span></div>
+          <div class="flow-row"><span class="flow-label">Session duration</span><span class="flow-val">4m 12s</span></div>
+          <div class="flow-row"><span class="flow-label">Pressure</span><span class="flow-val">2.1 bar</span></div>
+          <div class="flow-row"><span class="flow-label">Temp</span><span class="flow-val txt-orange">38 °C</span></div>
+        </div>
+      </div>
+
+      <!-- Budget card -->
+      <div class="card" style="grid-column:3/4">
+        <div class="card-hd"><div><div class="card-title">Daily Budget Progress</div><div class="card-sub">Limit: 150 L / day</div></div></div>
+        <div class="budget-card">
+          <div class="budget-nums">
+            <div>
+              <div class="budget-used">87 L</div>
+              <div class="budget-total">of 150 L limit</div>
+            </div>
+            <div style="font-size:13px;color:var(--t2)">58%<br><span style="color:var(--green);font-size:11px">On track</span></div>
+          </div>
+          <div class="btrack"><div class="bfill" style="width:58%"></div></div>
+          <div class="bticks">
+            <span>0</span>
+            <span class="btick-warn">75%</span>
+            <span class="btick-danger">90%</span>
+            <span>150 L</span>
+          </div>
+          <div style="font-size:12px;color:var(--t3);margin-top:6px">63 L remaining · resets in <strong style="color:var(--t2)">9h 12m</strong></div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="dash-bot">
+      <!-- Mini stats -->
+      <div class="card">
+        <div class="card-hd"><div class="card-title">Today's Snapshot</div></div>
+        <div class="mini-stats">
+          <div class="mini-card">
+            <div class="mini-label">Leak risk</div>
+            <div class="mini-val txt-green">0.04</div>
+            <div class="mini-sub txt-green">Normal range</div>
+          </div>
+          <div class="mini-card">
+            <div class="mini-label">Model accuracy</div>
+            <div class="mini-val txt-blue">92%</div>
+            <div class="mini-sub txt-green">+23% since day 1</div>
+          </div>
+          <div class="mini-card">
+            <div class="mini-label">Appliances ID'd</div>
+            <div class="mini-val txt-purple">88.3%</div>
+            <div class="mini-sub" style="color:var(--t3)">Random Forest</div>
+          </div>
+          <div class="mini-card">
+            <div class="mini-label">Events today</div>
+            <div class="mini-val txt-teal">14</div>
+            <div class="mini-sub" style="color:var(--t3)">847 total ingested</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Self-learning loop -->
+      <div class="card">
+        <div class="card-hd">
+          <div><div class="card-title">Self-learning loop · S10</div><div class="card-sub">No retraining needed</div></div>
+          <div class="card-tag">Auto-calibrated</div>
+        </div>
+        <div class="anom-event-list">
+          <div class="anom-event">
+            <div style="width:26px;height:26px;border-radius:7px;background:rgba(61,142,255,.2);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0">S4</div>
+            <div class="anom-info"><div class="anom-name" style="font-size:12.5px">Behavioral profile updated</div><div class="anom-desc">EMA α=0.1 · 847 events ingested</div></div>
+            <div class="anom-time">now</div>
+          </div>
+          <div class="anom-event">
+            <div style="width:26px;height:26px;border-radius:7px;background:rgba(34,212,106,.2);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0">S5</div>
+            <div class="anom-info"><div class="anom-name" style="font-size:12.5px">Anomaly thresholds refined</div><div class="anom-desc">3-tier sensitivity auto-calibrated</div></div>
+            <div class="anom-time">2m ago</div>
+          </div>
+          <div class="anom-event">
+            <div style="width:26px;height:26px;border-radius:7px;background:rgba(245,166,35,.2);color:var(--orange);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0">S7</div>
+            <div class="anom-info"><div class="anom-name" style="font-size:12.5px">Recommendations re-ranked</div><div class="anom-desc">By impact-to-effort ratio</div></div>
+            <div class="anom-time">5m ago</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE: USAGE BREAKDOWN ══ -->
+  <div class="page" id="page-usage">
+    <div class="page-title-row"><span class="page-icon">📊</span><span class="page-h">Usage Breakdown</span></div>
+    <div class="page-desc">Appliance-level water consumption analysis · Today</div>
+
+    <div class="usage-grid">
+      <!-- Pie chart -->
+      <div class="card">
+        <div class="card-hd"><div class="card-title">Consumption by Appliance</div><div class="card-tag">Total: 142 L</div></div>
+        <div class="pie-wrap">
+          <div class="pie-chart"></div>
+          <div class="pie-legend">
+            <div class="leg-item"><div class="leg-dot" style="background:#3d8eff"></div><span class="leg-name">Shower</span><span class="leg-pct txt-blue">38%</span></div>
+            <div class="leg-item"><div class="leg-dot" style="background:#00d4aa"></div><span class="leg-name">Kitchen tap</span><span class="leg-pct txt-teal">22%</span></div>
+            <div class="leg-item"><div class="leg-dot" style="background:#f5a623"></div><span class="leg-name">Washing machine</span><span class="leg-pct txt-orange">18%</span></div>
+            <div class="leg-item"><div class="leg-dot" style="background:#ff6fa3"></div><span class="leg-name">Toilet flush</span><span class="leg-pct txt-pink">14%</span></div>
+            <div class="leg-item"><div class="leg-dot" style="background:#a78bfa"></div><span class="leg-name">Other</span><span class="leg-pct txt-purple">8%</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bar chart -->
+      <div class="card">
+        <div class="card-hd"><div class="card-title">Litres by Appliance</div><div class="card-tag">Today only</div></div>
+        <div class="hbar-list" style="margin-top:4px">
+          <div class="hbar-item"><span class="hbar-name">Shower</span><div class="hbar-track"><div class="hbar-fill" style="width:100%;background:#3d8eff"></div></div><span class="hbar-val txt-blue">54 L</span></div>
+          <div class="hbar-item"><span class="hbar-name">Kitchen tap</span><div class="hbar-track"><div class="hbar-fill" style="width:57%;background:#00d4aa"></div></div><span class="hbar-val txt-teal">31 L</span></div>
+          <div class="hbar-item"><span class="hbar-name">Washing machine</span><div class="hbar-track"><div class="hbar-fill" style="width:47%;background:#f5a623"></div></div><span class="hbar-val txt-orange">26 L</span></div>
+          <div class="hbar-item"><span class="hbar-name">Toilet flush</span><div class="hbar-track"><div class="hbar-fill" style="width:37%;background:#ff6fa3"></div></div><span class="hbar-val" style="color:#ff6fa3">20 L</span></div>
+          <div class="hbar-item"><span class="hbar-name">Other</span><div class="hbar-track"><div class="hbar-fill" style="width:21%;background:#a78bfa"></div></div><span class="hbar-val txt-purple">11 L</span></div>
+        </div>
+      </div>
+
+      <!-- 7-day trend -->
+      <div class="card usage-full">
+        <div class="card-hd"><div class="card-title">7-Day Usage Trend</div><div class="card-tag">Litres per day</div></div>
+        <div class="trend-bars">
+          <div class="trend-bar-wrap"><div class="trend-bar" style="height:62%"></div><div class="trend-day">Mon</div></div>
+          <div class="trend-bar-wrap"><div class="trend-bar" style="height:78%"></div><div class="trend-day">Tue</div></div>
+          <div class="trend-bar-wrap"><div class="trend-bar" style="height:55%"></div><div class="trend-day">Wed</div></div>
+          <div class="trend-bar-wrap"><div class="trend-bar" style="height:88%"></div><div class="trend-day">Thu</div></div>
+          <div class="trend-bar-wrap"><div class="trend-bar" style="height:72%"></div><div class="trend-day">Fri</div></div>
+          <div class="trend-bar-wrap"><div class="trend-bar" style="height:65%"></div><div class="trend-day">Sat</div></div>
+          <div class="trend-bar-wrap"><div class="trend-bar today" style="height:58%"></div><div class="trend-day" style="color:var(--teal)">Today</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE: FORECASTING ══ -->
+  <div class="page" id="page-forecasting">
+    <div class="page-title-row"><span class="page-icon">📈</span><span class="page-h">Forecasting View</span></div>
+    <div class="page-desc">7-day predictive model · LSTM + behavioural baseline</div>
+
+    <div class="forecast-grid">
+      <div class="card">
+        <div class="fstat">
+          <div class="fstat-label">Predicted tomorrow</div>
+          <div class="fstat-val txt-blue">138 L</div>
+          <div class="fstat-change txt-green">↓ 5% vs today</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="fstat">
+          <div class="fstat-label">7-day average forecast</div>
+          <div class="fstat-val txt-teal">144 L</div>
+          <div class="fstat-change txt-orange">↑ 2% vs last week</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="fstat">
+          <div class="fstat-label">Forecast confidence</div>
+          <div class="fstat-val txt-purple">±11 L</div>
+          <div class="fstat-change" style="color:var(--t3)">95% CI band</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Line chart -->
+    <div class="card forecast-full">
+      <div class="card-hd">
+        <div><div class="card-title">7-Day Consumption Forecast</div><div class="card-sub">Shaded region = 95% confidence interval · vertical line = today</div></div>
+        <div style="display:flex;gap:14px;align-items:center">
+          <span style="font-size:11px;color:var(--teal)">— Actual</span>
+          <span style="font-size:11px;color:var(--blue)">— Forecast</span>
+          <span style="font-size:11px;color:rgba(61,142,255,.4)">■ 95% CI</span>
+        </div>
+      </div>
+      <div class="chart-container">
+        <svg class="chart-svg" viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="confGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#3d8eff" stop-opacity=".18"/>
+              <stop offset="100%" stop-color="#3d8eff" stop-opacity=".04"/>
+            </linearGradient>
+          </defs>
+          <!-- grid lines -->
+          <line x1="60" y1="20" x2="680" y2="20" class="grid-line"/>
+          <line x1="60" y1="65" x2="680" y2="65" class="grid-line"/>
+          <line x1="60" y1="110" x2="680" y2="110" class="grid-line"/>
+          <line x1="60" y1="155" x2="680" y2="155" class="grid-line"/>
+          <line x1="60" y1="200" x2="680" y2="200" class="axis-line"/>
+          <!-- y labels -->
+          <text x="50" y="24" class="axis-label" text-anchor="end">180</text>
+          <text x="50" y="69" class="axis-label" text-anchor="end">160</text>
+          <text x="50" y="114" class="axis-label" text-anchor="end">140</text>
+          <text x="50" y="159" class="axis-label" text-anchor="end">120</text>
+          <text x="50" y="204" class="axis-label" text-anchor="end">100</text>
+          <!-- x labels: Mon-Sun -->
+          <text x="105" y="215" class="axis-label" text-anchor="middle">Mon</text>
+          <text x="195" y="215" class="axis-label" text-anchor="middle">Tue</text>
+          <text x="285" y="215" class="axis-label" text-anchor="middle">Wed</text>
+          <text x="375" y="215" class="axis-label" text-anchor="middle">Thu (Today)</text>
+          <text x="465" y="215" class="axis-label" text-anchor="middle">Fri</text>
+          <text x="555" y="215" class="axis-label" text-anchor="middle">Sat</text>
+          <text x="645" y="215" class="axis-label" text-anchor="middle">Sun</text>
+          <!-- confidence band: upper and lower boundaries joined as polygon -->
+          <!-- upper: 148,138,152,157,133,128,141 → scaled; lower: upper-22 each -->
+          <!-- y = 200 - ((val-100)/80)*180 -->
+          <!-- 148→110, 138→131, 152→106, 157→97, 133→143, 128→153, 141→129 -->
+          <!-- upper+11: 159→86, 149→108, 163→82, 168→73, 144→133, 139→143, 152→106 -->
+          <!-- lower-11: 137→135, 127→155, 141→131, 146→122, 122→153, 117→163, 130→153 -->
+          <polygon points="375,73 465,133 555,143 645,106  645,163 555,163 465,153 375,122" class="conf-band"/>
+          <!-- actual line: Mon-Thu -->
+          <polyline class="actual-line" points="105,110 195,131 285,106 375,97"/>
+          <!-- forecast line: Thu-Sun -->
+          <polyline class="forecast-line" points="375,97 465,143 555,153 645,129" stroke-dasharray="8,4"/>
+          <!-- today vertical -->
+          <line x1="375" y1="20" x2="375" y2="200" class="today-line"/>
+          <text x="379" y="32" class="today-label">Today</text>
+          <!-- dots actual -->
+          <circle cx="105" cy="110" r="4" class="data-dot"/>
+          <circle cx="195" cy="131" r="4" class="data-dot"/>
+          <circle cx="285" cy="106" r="4" class="data-dot"/>
+          <circle cx="375" cy="97" r="5" class="data-dot today-dot"/>
+          <!-- dots forecast -->
+          <circle cx="465" cy="143" r="4" class="data-dot"/>
+          <circle cx="555" cy="153" r="4" class="data-dot"/>
+          <circle cx="645" cy="129" r="4" class="data-dot"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- 7-day table -->
+    <div class="card forecast-full">
+      <div class="card-hd"><div class="card-title">Day-by-Day Forecast</div></div>
+      <table class="day-table">
+        <thead><tr><th>Day</th><th>Predicted (L)</th><th>Lower CI</th><th>Upper CI</th><th>vs Budget</th><th>Confidence</th></tr></thead>
+        <tbody>
+          <tr><td>Monday</td><td>148</td><td>137</td><td>159</td><td style="color:var(--green)">−2 L</td><td>High <span class="conf-bar-sm" style="width:70px"></span></td></tr>
+          <tr><td>Tuesday</td><td>138</td><td>127</td><td>149</td><td style="color:var(--green)">−12 L</td><td>High <span class="conf-bar-sm" style="width:72px"></span></td></tr>
+          <tr><td>Wednesday</td><td>152</td><td>141</td><td>163</td><td style="color:var(--orange)">+2 L</td><td>High <span class="conf-bar-sm" style="width:68px"></span></td></tr>
+          <tr class="today-row"><td>Thursday (Today)</td><td>157</td><td>146</td><td>168</td><td style="color:var(--orange)">+7 L</td><td>Current</td></tr>
+          <tr><td>Friday</td><td>133</td><td>122</td><td>144</td><td style="color:var(--green)">−17 L</td><td>Medium <span class="conf-bar-sm" style="width:50px"></span></td></tr>
+          <tr><td>Saturday</td><td>128</td><td>117</td><td>139</td><td style="color:var(--green)">−22 L</td><td>Medium <span class="conf-bar-sm" style="width:44px"></span></td></tr>
+          <tr><td>Sunday</td><td>141</td><td>130</td><td>152</td><td style="color:var(--green)">−9 L</td><td>Low <span class="conf-bar-sm" style="width:28px"></span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ PAGE: ALERTS ══ -->
+  <div class="page" id="page-alerts">
+    <div class="page-title-row"><span class="page-icon">🔔</span><span class="page-h">Alerts & Recommendations</span></div>
+    <div class="page-desc">Smart notifications · 3 active alerts · 2 recommendations</div>
+
+    <div class="alerts-grid">
+      <!-- LEAK ALERT -->
+      <div class="alert-card alert-red alerts-full">
+        <div class="alert-hd">
+          <div class="alert-ico ico-red">🚨</div>
+          <div class="alert-title-wrap">
+            <div class="alert-title" style="color:#ff7070">Possible Leak Detected</div>
+            <div class="alert-time">Today · 02:14 AM · Confidence: 94%</div>
+          </div>
+        </div>
+        <div class="alert-body">Continuous flow detected at <strong style="color:#ff9090">02:14 AM</strong> — <strong style="color:#ff9090">0.08 L/min for 22 minutes</strong> (1.76 L total waste). No appliance activity pattern matched. Possible pipe drip or running toilet. Recommend inspection of bathroom cistern and pipe joints.</div>
+        <div class="alert-meta">
+          <span class="meta-chip chip-red">⚡ High severity</span>
+          <span class="meta-chip chip-red">0.08 L/min</span>
+          <span class="meta-chip chip-red">22 min duration</span>
+          <span class="meta-chip chip-red">1.76 L wasted</span>
+        </div>
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button class="alert-btn btn-red">🔍 Investigate</button>
+          <button class="alert-btn" style="background:rgba(255,255,255,.05);color:var(--t2)">Dismiss</button>
+        </div>
+      </div>
+
+      <!-- GREEN REC 1 -->
+      <div class="alert-card alert-green">
+        <div class="alert-hd">
+          <div class="alert-ico ico-green">💡</div>
+          <div class="alert-title-wrap">
+            <div class="alert-title" style="color:#22d46a">Reduce Shower Duration</div>
+            <div class="alert-time">Recommendation · Impact: High</div>
+          </div>
+        </div>
+        <div class="alert-body">Your average shower is <strong style="color:#4de888">11 minutes</strong>. Reducing by <strong style="color:#4de888">3 minutes</strong> saves <strong style="color:#4de888">27 L/day → ~810 L/month → ₹180/month</strong>.</div>
+        <div class="alert-meta">
+          <span class="meta-chip chip-green">↓ 27 L/day</span>
+          <span class="meta-chip chip-green">₹180/month</span>
+          <span class="meta-chip chip-green">Easy effort</span>
+        </div>
+        <button class="alert-btn btn-green" style="margin-top:10px">✓ Set shower timer</button>
+      </div>
+
+      <!-- ORANGE ALERT -->
+      <div class="alert-card alert-orange">
+        <div class="alert-hd">
+          <div class="alert-ico ico-orange">⚠️</div>
+          <div class="alert-title-wrap">
+            <div class="alert-title" style="color:var(--orange)">Budget at 75% by Noon</div>
+            <div class="alert-time">Today · Forecast alert</div>
+          </div>
+        </div>
+        <div class="alert-body">At current pace you will reach <strong style="color:#ffbb55">75% of daily budget</strong> by 12:30 PM — 6 hours earlier than your usual pattern. Consider delaying washing machine cycle to evening.</div>
+        <div class="alert-meta">
+          <span class="meta-chip chip-orange">⚡ Medium severity</span>
+          <span class="meta-chip chip-orange">Budget risk</span>
+        </div>
+        <button class="alert-btn btn-orange" style="margin-top:10px">📅 Reschedule wash</button>
+      </div>
+
+      <!-- BLUE REC 2 -->
+      <div class="alert-card alert-blue">
+        <div class="alert-hd">
+          <div class="alert-ico ico-blue">🌿</div>
+          <div class="alert-title-wrap">
+            <div class="alert-title" style="color:var(--blue)">Switch to Half-Flush</div>
+            <div class="alert-time">Recommendation · Impact: Medium</div>
+          </div>
+        </div>
+        <div class="alert-body">Your toilet flush patterns use <strong style="color:#70aaff">full flush 100%</strong> of the time. Using half-flush for 60% of uses could save <strong style="color:#70aaff">18 L/day → ₹95/month</strong>.</div>
+        <div class="alert-meta">
+          <span class="meta-chip chip-blue">↓ 18 L/day</span>
+          <span class="meta-chip chip-blue">₹95/month</span>
+        </div>
+        <button class="alert-btn btn-blue" style="margin-top:10px">📖 Learn more</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE: ANOMALY DETECTION ══ -->
+  <div class="page" id="page-anomaly">
+    <div class="page-title-row"><span class="page-icon">🔬</span><span class="page-h">Anomaly Detection</span></div>
+    <div class="page-desc">Real-time leak & anomaly scoring · 3-tier sensitivity · LSTM autoencoder</div>
+
+    <div class="anomaly-grid">
+      <!-- Risk score ring -->
+      <div class="card" style="grid-column:1/2">
+        <div class="card-hd"><div class="card-title">Current Risk Score</div><div class="card-tag">Live · LSTM</div></div>
+        <div class="anom-score-ring">
+          <div class="anom-ring-wrap">
+            <svg viewBox="0 0 140 140" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="70" cy="70" r="54" fill="none" stroke="#1e2130" stroke-width="12"/>
+              <!-- low score 0.04 → only tiny arc, use green -->
+              <circle cx="70" cy="70" r="54" fill="none" stroke="#22d46a" stroke-width="12"
+                stroke-dasharray="14 325" stroke-dashoffset="-85" stroke-linecap="round"/>
+            </svg>
+            <div class="anom-ring-center">
+              <div class="anom-score-val txt-green">0.04</div>
+              <div class="anom-score-lbl">Risk index</div>
+            </div>
+          </div>
+          <div class="anom-caption"><span class="pill pill-active">● Normal</span><br><span style="font-size:11px;color:var(--t3);margin-top:4px;display:block">Threshold: 0.35</span></div>
+        </div>
+      </div>
+
+      <!-- Sensitivity controls -->
+      <div class="card" style="grid-column:2/3">
+        <div class="card-hd"><div class="card-title">Detection Sensitivity</div><div class="card-sub">Auto-calibrated · S5</div></div>
+        <div style="display:flex;flex-direction:column;gap:12px;padding:4px">
+          <div class="sens-row">
+            <span class="sens-label txt-green" style="font-size:11px">Low</span>
+            <div class="sens-track"><div class="sens-fill" style="width:30%;background:var(--green)"></div></div>
+            <span class="sens-val txt-green">0.1</span>
+          </div>
+          <div class="sens-row">
+            <span class="sens-label txt-orange" style="font-size:11px">Medium</span>
+            <div class="sens-track"><div class="sens-fill" style="width:60%;background:var(--orange)"></div></div>
+            <span class="sens-val txt-orange">0.35</span>
+          </div>
+          <div class="sens-row">
+            <span class="sens-label txt-red" style="font-size:11px">High</span>
+            <div class="sens-track"><div class="sens-fill" style="width:90%;background:var(--red)"></div></div>
+            <span class="sens-val txt-red">0.7</span>
+          </div>
+          <div style="font-size:11.5px;color:var(--t3);padding-top:4px;border-top:1px solid var(--border)">Current mode: <strong style="color:var(--t1)">Adaptive</strong> · recalibrated every 6h</div>
+        </div>
+      </div>
+
+      <!-- Model health -->
+      <div class="card" style="grid-column:1/2">
+        <div class="card-hd"><div class="card-title">Model Health</div><div class="card-sub">Last retrained: Day 88</div></div>
+        <div class="model-health">
+          <div class="mh-row"><span class="mh-label">Accuracy</span><div class="mh-bar-wrap"><div class="mh-bar" style="width:92%;background:var(--green)"></div></div><span style="font-size:12px;font-family:var(--mono);color:var(--green)">92%</span></div>
+          <div class="mh-row"><span class="mh-label">Precision</span><div class="mh-bar-wrap"><div class="mh-bar" style="width:88%;background:var(--blue)"></div></div><span style="font-size:12px;font-family:var(--mono);color:var(--blue)">88%</span></div>
+          <div class="mh-row"><span class="mh-label">Recall</span><div class="mh-bar-wrap"><div class="mh-bar" style="width:85%;background:var(--teal)"></div></div><span style="font-size:12px;font-family:var(--mono);color:var(--teal)">85%</span></div>
+          <div class="mh-row"><span class="mh-label">F1 Score</span><div class="mh-bar-wrap"><div class="mh-bar" style="width:86%;background:var(--purple)"></div></div><span style="font-size:12px;font-family:var(--mono);color:var(--purple)">0.86</span></div>
+          <div class="mh-row"><span class="mh-label">Data drift</span><div class="mh-bar-wrap"><div class="mh-bar" style="width:12%;background:var(--orange)"></div></div><span style="font-size:12px;font-family:var(--mono);color:var(--green)">Low</span></div>
+        </div>
+      </div>
+
+      <!-- Recent anomaly events -->
+      <div class="card" style="grid-column:2/3">
+        <div class="card-hd"><div class="card-title">Recent Anomaly Events</div><div class="card-tag">Last 24h</div></div>
+        <div class="anom-event-list">
+          <div class="anom-event">
+            <div class="anom-sev sev-high"></div>
+            <div class="anom-info"><div class="anom-name">Continuous night flow</div><div class="anom-desc">0.08 L/min · 22 min · No appliance match</div></div>
+            <div class="anom-time">02:14</div>
+          </div>
+          <div class="anom-event">
+            <div class="anom-sev sev-med"></div>
+            <div class="anom-info"><div class="anom-name">Unusual peak flow</div><div class="anom-desc">3.2 L/min burst · Kitchen tap · 4s</div></div>
+            <div class="anom-time">08:47</div>
+          </div>
+          <div class="anom-event">
+            <div class="anom-sev sev-low"></div>
+            <div class="anom-info"><div class="anom-name">Extended shower session</div><div class="anom-desc">14 min vs 8 min baseline · +75%</div></div>
+            <div class="anom-time">07:22</div>
+          </div>
+          <div class="anom-event">
+            <div class="anom-sev sev-low"></div>
+            <div class="anom-info"><div class="anom-name">Off-schedule wash cycle</div><div class="anom-desc">2:00 AM start · unusual time pattern</div></div>
+            <div class="anom-time">Yesterday</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE: ML PIPELINE ══ -->
+  <div class="page" id="page-mlpipeline">
+    <div class="page-title-row"><span class="page-icon">⚙️</span><span class="page-h">ML Pipeline</span></div>
+    <div class="page-desc">End-to-end model training & inference pipeline status</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
+      <div class="card"><div class="card-hd"><div class="card-title">Data Ingestion</div></div><div class="mini-val txt-green" style="font-size:16px">● Running</div><div class="mini-sub" style="color:var(--t3);margin-top:8px">847 events · 2s latency</div></div>
+      <div class="card"><div class="card-hd"><div class="card-title">Feature Extraction</div></div><div class="mini-val txt-blue" style="font-size:16px">● Active</div><div class="mini-sub" style="color:var(--t3);margin-top:8px">42 features · FFT + statistical</div></div>
+      <div class="card"><div class="card-hd"><div class="card-title">Inference Engine</div></div><div class="mini-val txt-teal" style="font-size:16px">● Online</div><div class="mini-sub" style="color:var(--t3);margin-top:8px">Random Forest · &lt;10ms latency</div></div>
+    </div>
+    <div class="card" style="margin-top:0"><div class="card-hd"><div class="card-title">Pipeline Stages</div></div>
+      <div style="display:flex;align-items:center;gap:0;overflow:hidden;border-radius:8px;border:1px solid var(--border)">
+        <div style="flex:1;padding:12px 14px;background:rgba(34,212,106,.1);border-right:1px solid var(--border);text-align:center"><div style="font-size:11px;color:var(--green);font-weight:600">INGEST</div><div style="font-size:10px;color:var(--t3);margin-top:2px">Kafka stream</div></div>
+        <div style="color:var(--t3);padding:0 4px">→</div>
+        <div style="flex:1;padding:12px 14px;background:rgba(61,142,255,.1);border-right:1px solid var(--border);text-align:center"><div style="font-size:11px;color:var(--blue);font-weight:600">PREPROCESS</div><div style="font-size:10px;color:var(--t3);margin-top:2px">Normalise + segment</div></div>
+        <div style="color:var(--t3);padding:0 4px">→</div>
+        <div style="flex:1;padding:12px 14px;background:rgba(0,212,170,.1);border-right:1px solid var(--border);text-align:center"><div style="font-size:11px;color:var(--teal);font-weight:600">FEATURES</div><div style="font-size:10px;color:var(--t3);margin-top:2px">42 engineered</div></div>
+        <div style="color:var(--t3);padding:0 4px">→</div>
+        <div style="flex:1;padding:12px 14px;background:rgba(167,139,250,.1);border-right:1px solid var(--border);text-align:center"><div style="font-size:11px;color:var(--purple);font-weight:600">CLASSIFY</div><div style="font-size:10px;color:var(--t3);margin-top:2px">Random Forest</div></div>
+        <div style="color:var(--t3);padding:0 4px">→</div>
+        <div style="flex:1;padding:12px 14px;background:rgba(245,166,35,.1);text-align:center"><div style="font-size:11px;color:var(--orange);font-weight:600">OUTPUT</div><div style="font-size:10px;color:var(--t3);margin-top:2px">Dashboard + alerts</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PAGE: DEPLOYMENT ══ -->
+  <div class="page" id="page-deployment">
+    <div class="page-title-row"><span class="page-icon">🚀</span><span class="page-h">Deployment</span></div>
+    <div class="page-desc">Model versioning, rollouts and production status</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="card"><div class="card-hd"><div class="card-title">Active Models</div></div>
+        <div class="anom-event-list">
+          <div class="anom-event"><div class="anom-sev sev-high" style="background:var(--green);box-shadow:0 0 6px var(--green)"></div><div class="anom-info"><div class="anom-name">AquaClassifier v3.2</div><div class="anom-desc">Random Forest · 88.3% accuracy · Production</div></div><div class="anom-time">LIVE</div></div>
+          <div class="anom-event"><div class="anom-sev sev-med"></div><div class="anom-info"><div class="anom-name">LeakNet v1.4</div><div class="anom-desc">LSTM Autoencoder · 92% · Production</div></div><div class="anom-time">LIVE</div></div>
+          <div class="anom-event"><div class="anom-sev sev-low" style="background:var(--blue);box-shadow:none"></div><div class="anom-info"><div class="anom-name">ForecastNet v2.1</div><div class="anom-desc">LSTM · ±11L CI · Staging</div></div><div class="anom-time">STAGING</div></div>
+        </div>
+      </div>
+      <div class="card"><div class="card-hd"><div class="card-title">Deployment Health</div></div>
+        <div class="model-health">
+          <div class="mh-row"><span class="mh-label">Uptime</span><div class="mh-bar-wrap"><div class="mh-bar" style="width:99%;background:var(--green)"></div></div><span style="font-size:12px;font-family:var(--mono);color:var(--green)">99.8%</span></div>
+          <div class="mh-row"><span class="mh-label">API latency</span><div class="mh-bar-wrap"><div class="mh-bar" style="width:20%;background:var(--teal)"></div></div><span style="font-size:12px;font-family:var(--mono);color:var(--teal)">&lt;10ms</span></div>
+          <div class="mh-row"><span class="mh-label">Throughput</span><div class="mh-bar-wrap"><div class="mh-bar" style="width:45%;background:var(--blue)"></div></div><span style="font-size:12px;font-family:var(--mono);color:var(--blue)">450/s</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+const pages = {
+  dashboard: {title:'Live dashboard', sub:'Today · H1 flow meter'},
+  usage:     {title:'Usage Breakdown', sub:'Appliance analysis · Today'},
+  forecasting:{title:'Forecasting View', sub:'7-day predictive model'},
+  alerts:    {title:'Alerts & Recommendations', sub:'3 active · 2 recommendations'},
+  anomaly:   {title:'Anomaly Detection', sub:'Real-time scoring · LSTM'},
+  mlpipeline:{title:'ML Pipeline', sub:'Training & inference status'},
+  deployment:{title:'Deployment', sub:'Model versioning & rollouts'},
+};
+
+function showPage(id, navEl) {
+  // hide all pages
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav').forEach(n => n.classList.remove('active'));
+  // show target
+  document.getElementById('page-'+id).classList.add('active');
+  navEl.classList.add('active');
+  // update topbar
+  const p = pages[id];
+  document.getElementById('tb-title').textContent = p.title;
+  document.getElementById('tb-sub').textContent = p.sub;
+}
+</script>
+</body>
+</html>
